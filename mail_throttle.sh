@@ -27,7 +27,12 @@ function mt_send_mail {
   email_subject="$2"
   email_body="$3"
 
-  echo "$email_body" | /usr/bin/mailx -v -s "$email_subject" "$email_address" &> /dev/null
+  gpg --list-keys "$email_address"
+  if [ $? -eq 0 ]; then
+    echo "$email_body" | gpg2 --encrypt --armor --always-trust --recipient "$email_address" | /usr/bin/mailx -v -s "$email_subject" "$email_address" &> /dev/null
+  else
+    echo "$email_body" | /usr/bin/mailx -v -s "$email_subject" "$email_address" &> /dev/null
+  fi
 }
 
 function mt_send_queue {
